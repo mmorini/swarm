@@ -1,0 +1,23 @@
+.PHONY: headers swarm-link
+
+MAKEH2X = $(top_srcdir)/src/defobj/make-h2x
+
+SUFFIXES = .m
+
+TYPEINFO = $(MODULE).xm $(MODULE)_types.h $(MODULE)_classes.h
+
+CLEANFILES = $(TYPEINFO)
+
+headers: $(firstword $(TYPEINFO))
+
+swarm-link:
+	-rm -f Swarm
+	-rm -f $(srcdir)/Swarm
+	-$(LN_S) . Swarm
+	-$(LN_S) . $(srcdir)/Swarm
+
+$(firstword $(TYPEINFO)): $(MODULE).h $(MAKEH2X) # $(SOURCES)
+	OBJC="$(OBJC)" OBJCFLAGS="$(DEFS) $(INCLUDES) $(CPPFLAGS) $(OBJCFLAGS)" OBJECTS="$(patsubst %.m,%.o,$(filter-out %.h,$(type_SRCS)))" GSED="$(GSED)" sh $(MAKEH2X) $(MODULE).xm $(srcdir)
+	mv $(MODULE).xt $(MODULE)_types.h
+	mv $(MODULE).xc $(MODULE)_classes.h
+
